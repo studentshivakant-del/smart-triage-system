@@ -1,77 +1,156 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>Patient Registration</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Patient Registration - MoHFW CDSS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #0b1329;
+            --card-bg: #131f37;
+            --card-border: #1e2e4a;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #ef4444;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+        .container { max-width: 860px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 18px 24px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+        }
+        .header h1 { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 10px; color: #fff; }
+        .header a { color: #38bdf8; text-decoration: none; font-weight: 600; font-size: 14px; }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 26px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; }
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: #0b1329;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 16px;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus { border-color: #38bdf8; outline: none; }
+        textarea { resize: vertical; min-height: 80px; }
+        .btn-submit {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .btn-submit:hover { opacity: 0.95; }
+        @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+    </style>
 </head>
-
 <body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fa-solid fa-hospital-user" style="color:var(--accent);"></i> Emergency Patient Admission</h1>
+        <a href="/"><i class="fa-solid fa-arrow-left"></i> Command Center</a>
+    </div>
 
-    <h1>🏥 Hospital Emergency System</h1>
+    <div class="card">
+        <form method="POST" action="/register">
+            <div class="grid-2">
+                <div>
+                    <label>Full Patient Name:</label>
+                    <input type="text" name="name" placeholder="e.g. Ramesh Kumar" required>
+                </div>
+                <div>
+                    <label>Age (Years):</label>
+                    <input type="number" name="age" placeholder="e.g. 45" required>
+                </div>
+            </div>
 
-    <h2>📝 Patient Registration</h2>
+            <div class="grid-2">
+                <div>
+                    <label>Gender:</label>
+                    <select name="gender" required>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Blood Group:</label>
+                    <select name="blood_group">
+                        <option value="Unknown">Unknown</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                    </select>
+                </div>
+            </div>
 
-    <hr>
+            <div class="grid-2">
+                <div>
+                    <label>Contact Phone Number:</label>
+                    <input type="text" name="phone" placeholder="+91 9876543210">
+                </div>
+                <div>
+                    <label>Emergency Relative Contact:</label>
+                    <input type="text" name="emergency_contact" placeholder="+91 9876500000">
+                </div>
+            </div>
 
-    <form method="POST" action="/register">
+            <label>Residential Address / City:</label>
+            <input type="text" name="address" placeholder="e.g. Bandra, Mumbai">
 
-        <label>Patient Name:</label>
-        <br>
-        <input type="text" name="name"
-               placeholder="Enter patient name" required>
+            <div class="grid-2">
+                <div>
+                    <label>Significant Medical History:</label>
+                    <textarea name="medical_history" placeholder="e.g. Type-2 Diabetes, Hypertension, CAD"></textarea>
+                </div>
+                <div>
+                    <label>Known Drug/Substance Allergies:</label>
+                    <textarea name="allergies" placeholder="e.g. Penicillin, NSAIDs (or None)"></textarea>
+                </div>
+            </div>
 
-        <br><br>
-
-        <label>Age:</label>
-        <br>
-        <input type="number" name="age"
-               placeholder="Enter age"
-               min="0" max="120" required>
-
-        <br><br>
-
-        <label>Gender:</label>
-        <br>
-
-        <select name="gender" required>
-            <option value="">Select Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-        </select>
-
-        <br><br>
-
-        <label>Phone Number:</label>
-        <br>
-        <input type="tel" name="phone"
-               placeholder="Enter phone number" required>
-
-        <br><br>
-
-        <label>Address:</label>
-        <br>
-
-        <textarea name="address"
-                  placeholder="Enter patient address"
-                  rows="4"
-                  cols="35"
-                  required></textarea>
-
-        <br><br>
-
-        <button type="submit">
-            ✅ Register Patient
-        </button>
-
-    </form>
-
-    <br>
-
-    <a href="/">
-        ← Back to Dashboard
-    </a>
-
+            <button type="submit" class="btn-submit"><i class="fa-solid fa-id-card-clip"></i> Complete Emergency Admission</button>
+        </form>
+    </div>
+</div>
 </body>
-
 </html>
