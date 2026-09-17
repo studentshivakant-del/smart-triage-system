@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Triage History</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background: #f8fafc; }
+        table { width: 100%; border-collapse: collapse; background: white; margin-top: 20px; }
+        th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: left; }
+        th { background: #e2e8f0; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; color: white; }
+        .bg-crit { background: #dc2626; }
+        .bg-high { background: #f59e0b; }
+        .bg-norm { background: #16a34a; }
+        a { text-decoration: none; color: #2563eb; }
+    </style>
+</head>
+<body>
+    <h1>📜 Emergency Triage Assessment History</h1>
+    <a href="/">← Back to Dashboard</a> | <a href="/triage">⚡ New Assessment</a>
+
+    {% if history %}
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Patient ID</th>
+                <th>Name</th>
+                <th>Priority</th>
+                <th>Symptoms</th>
+                <th>Vitals (HR/SpO2/Temp)</th>
+                <th>Reason</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in history %}
+            <tr>
+                <td>{{ row['created_at'] }}</td>
+                <td><strong>{{ row['patient_id'] }}</strong></td>
+                <td>{{ row['name'] or 'Unknown' }}</td>
+                <td>
+                    <span class="badge {% if row['priority'] == 'CRITICAL' %}bg-crit{% elif row['priority'] == 'HIGH' %}bg-high{% else %}bg-norm{% endif %}">
+                        {{ row['priority'] }}
+                    </span>
+                </td>
+                <td>{{ row['symptoms'] }}</td>
+                <td>{{ row['heart_rate'] or '-' }} bpm | {{ row['oxygen_level'] or '-' }}% | {{ row['temperature'] or '-' }}°C</td>
+                <td>{{ row['assessment_reason'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No triage history found.</p>
+    {% endif %}
+</body>
+</html>

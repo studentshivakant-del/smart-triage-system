@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patient Details - {{ patient['name'] }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        h1 {
+            color: #1f4e79;
+            margin-top: 0;
+        }
+        .badge {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .section {
+            margin-top: 25px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 10px 14px;
+            border: 1px solid #e5e7eb;
+            text-align: left;
+        }
+        th {
+            background-color: #f9fafb;
+            width: 30%;
+            color: #4b5563;
+        }
+        .btn-group {
+            margin-top: 30px;
+        }
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-right: 10px;
+            color: white;
+            font-weight: bold;
+        }
+        .btn-edit {
+            background-color: #d97706;
+        }
+        .btn-triage {
+            background-color: #dc2626;
+        }
+        .btn-back {
+            background-color: #6b7280;
+        }
+        .triage-card {
+            background: #fdf2f8;
+            border-left: 4px solid #db2777;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏥 Patient Profile</h1>
+    <p>Patient ID: <span class="badge">{{ patient['patient_id'] }}</span></p>
+
+    <div class="section">
+        <h3>📋 Personal & Medical Information</h3>
+        <table>
+            <tr>
+                <th>Full Name</th>
+                <td><strong>{{ patient['name'] }}</strong></td>
+            </tr>
+            <tr>
+                <th>Age / Gender</th>
+                <td>{{ patient['age'] }} Years / {{ patient['gender'] }}</td>
+            </tr>
+            <tr>
+                <th>Phone Number</th>
+                <td>{{ patient['phone'] }}</td>
+            </tr>
+            <tr>
+                <th>Address</th>
+                <td>{{ patient['address'] }}</td>
+            </tr>
+            <tr>
+                <th>Blood Group</th>
+                <td>{{ patient['blood_group'] or 'Not Recorded' }}</td>
+            </tr>
+            <tr>
+                <th>Emergency Contact</th>
+                <td>{{ patient['emergency_contact'] or 'Not Recorded' }}</td>
+            </tr>
+            <tr>
+                <th>Medical History</th>
+                <td>{{ patient['medical_history'] or 'None' }}</td>
+            </tr>
+            <tr>
+                <th>Known Allergies</th>
+                <td>{{ patient['allergies'] or 'None' }}</td>
+            </tr>
+            <tr>
+                <th>Registered At</th>
+                <td>{{ patient['created_at'] }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Triage Assessment History -->
+    <div class="section">
+        <h3>🚨 Emergency Triage History</h3>
+        {% if history %}
+            {% for record in history %}
+            <div class="triage-card">
+                <p><strong>Priority Level:</strong> {{ record['priority'] }}</p>
+                <p><strong>Symptoms:</strong> {{ record['symptoms'] }}</p>
+                <p><strong>Vitals:</strong> Heart Rate: {{ record['heart_rate'] }} BPM | SpO₂: {{ record['oxygen_level'] }}% | Temp: {{ record['temperature'] }}°C</p>
+                <p><strong>Assessment:</strong> {{ record['assessment_reason'] }}</p>
+                <small style="color: #666;">Assessed on: {{ record['created_at'] }}</small>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #6b7280;">No emergency triage assessments recorded for this patient yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="btn-group">
+        <a class="btn btn-triage" href="/triage">⚡ Go to Triage</a>
+        <a class="btn btn-edit" href="/update/{{ patient['patient_id'] }}">✏️ Edit Details</a>
+        <a class="btn btn-back" href="/patients">← Back to Patients</a>
+    </div>
+</div>
+
+</body>
+</html>

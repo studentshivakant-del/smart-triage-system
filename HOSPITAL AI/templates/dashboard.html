@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Smart Emergency Command Center</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Modern Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #0b1329;
+            --card-bg: #131f37;
+            --card-border: #1e2e4a;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-crit: #ef4444;
+            --accent-high: #f97316;
+            --accent-mod: #eab308;
+            --accent-low: #10b981;
+            --accent-blue: #3b82f6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Top Command Navbar */
+        .navbar {
+            background: rgba(19, 31, 55, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 16px 36px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            color: #ffffff;
+        }
+        .nav-brand i { color: #ef4444; font-size: 22px; }
+        .nav-center {
+            font-family: monospace;
+            font-size: 14px;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse-dot 1.5s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(1.3); }
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+        }
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.15) !important;
+            color: #f87171 !important;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .btn-logout:hover {
+            background: #ef4444 !important;
+            color: white !important;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1300px;
+            margin: 30px auto;
+            padding: 0 30px;
+        }
+
+        /* Quick Action Bar */
+        .action-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .btn-action {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.25s ease;
+        }
+        .btn-action:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        .btn-action i { font-size: 22px; }
+        .btn-reg { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+        .btn-triage { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+        .btn-queue { background: linear-gradient(135deg, #0284c7, #0369a1); }
+        .btn-records { background: linear-gradient(135deg, #475569, #334155); }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 22px;
+            border-radius: 14px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+        .stat-card.tot::before { background: var(--accent-blue); }
+        .stat-card.crit::before { background: var(--accent-crit); }
+        .stat-card.high::before { background: var(--accent-high); }
+        .stat-card.mod::before { background: var(--accent-mod); }
+        .stat-card.low::before { background: var(--accent-low); }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+        }
+        .stat-header i { font-size: 18px; }
+        .stat-val {
+            font-size: 36px;
+            font-weight: 800;
+            margin-top: 10px;
+            letter-spacing: -1px;
+        }
+
+        /* Analytics Section */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr;
+            gap: 22px;
+            margin-bottom: 32px;
+        }
+        .chart-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .chart-box h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #f1f5f9;
+        }
+
+        /* Recent Patients Table */
+        .table-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .table-box h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+        }
+        th {
+            background: rgba(15, 23, 42, 0.4);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.8px;
+        }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        .id-badge {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-weight: 700;
+        }
+        .action-icon {
+            color: #38bdf8;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .action-icon:hover { text-decoration: underline; }
+
+        @media (max-width: 992px) {
+            .charts-row { grid-template-columns: 1fr; }
+            .navbar { flex-direction: column; gap: 15px; align-items: flex-start; }
+            .nav-links { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="navbar">
+    <div class="nav-brand">
+        <i class="fa-solid fa-heart-pulse"></i>
+        <span>SMART CARE COMMAND</span>
+    </div>
+    <div class="nav-center">
+        <div class="live-dot"></div>
+        <span id="liveClock">LIVE | 00:00:00</span>
+    </div>
+    <div class="nav-links">
+        <a href="/" class="active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+        <a href="/queue"><i class="fa-solid fa-users-line"></i> Smart Queue</a>
+        <a href="/triage"><i class="fa-solid fa-brain"></i> AI Triage</a>
+        <a href="/patients"><i class="fa-solid fa-address-book"></i> Records</a>
+        <a href="/history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+        <a href="/logout" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <!-- Action Shortcuts -->
+    <div class="action-bar">
+        <a href="/register" class="btn-action btn-reg">
+            <i class="fa-solid fa-user-plus"></i>
+            <div>
+                <div>Register Patient</div>
+                <small style="opacity:0.8; font-weight:400;">New Emergency Admission</small>
+            </div>
+        </a>
+        <a href="/triage" class="btn-action btn-triage">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div>
+                <div>AI Assessment</div>
+                <small style="opacity:0.8; font-weight:400;">Run Triage & Symptoms</small>
+            </div>
+        </a>
+        <a href="/queue" class="btn-action btn-queue">
+            <i class="fa-solid fa-hospital-user"></i>
+            <div>
+                <div>Priority Queue</div>
+                <small style="opacity:0.8; font-weight:400;">Live Stopwatch Monitor</small>
+            </div>
+        </a>
+        <a href="/patients" class="btn-action btn-records">
+            <i class="fa-solid fa-database"></i>
+            <div>
+                <div>Patient Records</div>
+                <small style="opacity:0.8; font-weight:400;">Search, View & Update</small>
+            </div>
+        </a>
+    </div>
+
+    <!-- Live Numbers Grid -->
+    <div class="stats-grid">
+        <div class="stat-card tot">
+            <div class="stat-header">
+                <span>TOTAL REGISTERED</span>
+                <i class="fa-solid fa-hospital" style="color: var(--accent-blue);"></i>
+            </div>
+            <div class="stat-val" style="color: var(--accent-blue);">{{ total_patients }}</div>
+        </div>
+        <div class="stat-card crit">
+            <div class="stat-header">
+                <span>CRITICAL RED</span>
+                <i class="fa-solid fa-truck-medical" style="color: var(--accent-crit);"></i>
+            </div>
+            <div class="stat-val" style="color: var(--accent-crit);">{{ critical_cases }}</div>
+        </div>
+        <div class="stat-card high">
+            <div class="stat-header">
+                <span>HIGH PRIORITY</span>
+                <i class="fa-solid fa-circle-exclamation" style="color: var(--accent-high);"></i>
+            </div>
+            <div class="stat-val" style="color: var(--accent-high);">{{ high_cases }}</div>
+        </div>
+        <div class="stat-card mod">
+            <div class="stat-header">
+                <span>MODERATE</span>
+                <i class="fa-solid fa-clock" style="color: var(--accent-mod);"></i>
+            </div>
+            <div class="stat-val" style="color: var(--accent-mod);">{{ moderate_cases }}</div>
+        </div>
+        <div class="stat-card low">
+            <div class="stat-header">
+                <span>LOW / ROUTINE</span>
+                <i class="fa-solid fa-circle-check" style="color: var(--accent-low);"></i>
+            </div>
+            <div class="stat-val" style="color: var(--accent-low);">{{ low_cases }}</div>
+        </div>
+    </div>
+
+    <!-- Analytics Charts Section -->
+    <div class="charts-row">
+        <div class="chart-box">
+            <h3><i class="fa-solid fa-chart-simple" style="color:#38bdf8;"></i> Real-Time Triage Priority Distribution</h3>
+            <canvas id="barChart" height="120"></canvas>
+        </div>
+        <div class="chart-box">
+            <h3><i class="fa-solid fa-chart-pie" style="color:#38bdf8;"></i> Clinical Severity Ratio</h3>
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Admissions -->
+    <div class="table-box">
+        <h3><i class="fa-solid fa-bed-pulse" style="color:#38bdf8;"></i> Recently Admitted Emergency Patients</h3>
+        {% if recent_patients %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Patient ID</th>
+                    <th>Full Name</th>
+                    <th>Demographics</th>
+                    <th>Emergency Contact</th>
+                    <th>Registered At</th>
+                    <th>Profile</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in recent_patients %}
+                <tr>
+                    <td><span class="id-badge">{{ p['patient_id'] }}</span></td>
+                    <td><strong>{{ p['name'] }}</strong></td>
+                    <td>{{ p['age'] }} yrs • {{ p['gender'] }}</td>
+                    <td>{{ p['phone'] }}</td>
+                    <td><small style="color:var(--text-secondary);">{{ p['created_at'] }}</small></td>
+                    <td><a class="action-icon" href="/patient/{{ p['patient_id'] }}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Details</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p style="color: var(--text-secondary); padding: 15px 0;">No patient records available yet.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+    // Live Digital Clock
+    function updateClock() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString();
+        document.getElementById('liveClock').innerText = `LIVE | ${timeStr}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Chart.js Configuration
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.font.family = 'Inter';
+
+    // Bar Chart
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+    new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: ['Critical', 'High Priority', 'Moderate', 'Low Priority'],
+            datasets: [{
+                label: 'Cases',
+                data: [{{ critical_cases }}, {{ high_cases }}, {{ moderate_cases }}, {{ low_cases }}],
+                backgroundColor: ['#ef4444', '#f97316', '#eab308', '#10b981'],
+                borderRadius: 8,
+                barThickness: 32
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    ticks: { stepSize: 1 }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Donut Chart
+    const ctxPie = document.getElementById('pieChart').getContext('2d');
+    new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+            labels: ['Critical', 'High', 'Moderate', 'Low'],
+            datasets: [{
+                data: [{{ critical_cases }}, {{ high_cases }}, {{ moderate_cases }}, {{ low_cases }}],
+                backgroundColor: ['#ef4444', '#f97316', '#eab308', '#10b981'],
+                borderColor: '#131f37',
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '72%',
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14 } }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Patient - {{ patient['patient_id'] }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .form-card {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        h1 {
+            color: #1f4e79;
+            margin-top: 0;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+        button {
+            margin-top: 25px;
+            padding: 12px 20px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #1557b0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #4b5563;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="form-card">
+    <h1>✏️ Update Patient</h1>
+    <p><strong>Patient ID:</strong> {{ patient['patient_id'] }}</p>
+    <hr>
+
+    <form method="POST">
+        <label>Patient Name:</label>
+        <input type="text" name="name" value="{{ patient['name'] }}" required>
+
+        <label>Age:</label>
+        <input type="number" name="age" value="{{ patient['age'] }}" min="0" max="120" required>
+
+        <label>Gender:</label>
+        <select name="gender" required>
+            <option value="Male" {% if patient['gender'] == "Male" %}selected{% endif %}>Male</option>
+            <option value="Female" {% if patient['gender'] == "Female" %}selected{% endif %}>Female</option>
+            <option value="Other" {% if patient['gender'] == "Other" %}selected{% endif %}>Other</option>
+        </select>
+
+        <label>Phone Number:</label>
+        <input type="tel" name="phone" value="{{ patient['phone'] }}" required>
+
+        <label>Address:</label>
+        <textarea name="address" rows="3" required>{{ patient['address'] }}</textarea>
+
+        <label>Blood Group:</label>
+        <input type="text" name="blood_group" value="{{ patient['blood_group'] or '' }}" placeholder="e.g. O+, A+, B-">
+
+        <label>Emergency Contact:</label>
+        <input type="text" name="emergency_contact" value="{{ patient['emergency_contact'] or '' }}" placeholder="Contact person & number">
+
+        <label>Medical History:</label>
+        <textarea name="medical_history" rows="2" placeholder="e.g. Diabetes, Hypertension">{{ patient['medical_history'] or '' }}</textarea>
+
+        <label>Allergies:</label>
+        <input type="text" name="allergies" value="{{ patient['allergies'] or '' }}" placeholder="e.g. Penicillin, Peanuts">
+
+        <button type="submit">💾 Save Changes</button>
+    </form>
+
+    <a class="back-link" href="/patients">← Cancel and Back to Patients</a>
+</div>
+
+</body>
+</html>

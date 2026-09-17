@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoHFW Smart Emergency Queue - Live Triage Monitor</title>
+    <!-- FontAwesome CDN for Clinical Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #0b1329;
+            --card-bg: #131f37;
+            --card-border: #1e2e4a;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --zone-red: #ef4444;
+            --zone-yellow: #f97316;
+            --zone-green: #10b981;
+            --zone-black: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1350px;
+            margin: 0 auto;
+        }
+
+        /* Top Command Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 20px 30px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+            margin: 0;
+        }
+        .header-title i {
+            color: #ef4444;
+            font-size: 24px;
+        }
+        .badge-standard {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn-nav {
+            text-decoration: none;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: all 0.2s;
+        }
+        .btn-back {
+            background: rgba(255, 255, 255, 0.06);
+            color: #cbd5e1;
+            border: 1px solid var(--card-border);
+        }
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+        .btn-triage {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: #fff;
+            box-shadow: 0 3px 12px rgba(239, 68, 68, 0.3);
+        }
+        .btn-triage:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        /* Priority Protocol Reference Bar */
+        .protocol-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+        .proto-pill {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 12px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+        }
+        .proto-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .dot-red { background: var(--zone-red); box-shadow: 0 0 10px var(--zone-red); }
+        .dot-yellow { background: var(--zone-yellow); box-shadow: 0 0 10px var(--zone-yellow); }
+        .dot-green { background: var(--zone-green); box-shadow: 0 0 10px var(--zone-green); }
+        .dot-black { background: var(--zone-black); }
+
+        /* Table Card Container */
+        .table-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.25);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 16px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13.5px;
+            vertical-align: middle;
+        }
+        th {
+            background: rgba(15, 23, 42, 0.7);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+        }
+        tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        /* Elements Styling */
+        .rank-badge {
+            font-family: monospace;
+            font-weight: 900;
+            font-size: 15px;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .id-badge {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 12px;
+        }
+        .patient-name {
+            font-weight: 700;
+            color: #ffffff;
+            display: block;
+        }
+        .patient-demo {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-top: 2px;
+            display: block;
+        }
+        .incident-badge {
+            display: inline-block;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--card-border);
+        }
+
+        /* DGHS Color Badges */
+        .triage-badge {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+        }
+        .badge-RED {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        .badge-YELLOW {
+            background: rgba(249, 115, 22, 0.15);
+            color: #f97316;
+            border: 1px solid #f97316;
+        }
+        .badge-GREEN {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+        .badge-BLACK {
+            background: rgba(15, 23, 42, 0.9);
+            color: #94a3b8;
+            border: 1px solid #64748b;
+        }
+
+        /* Live Waiting Stopwatch */
+        .timer-box {
+            font-family: monospace;
+            font-size: 13px;
+            font-weight: 700;
+            color: #f87171;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 5px 9px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Vitals Quick Summary */
+        .vitals-summary {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-family: monospace;
+            line-height: 1.4;
+        }
+
+        /* Action Form */
+        .status-form {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin: 0;
+        }
+        select.select-status {
+            background: #0b1329;
+            border: 1px solid var(--card-border);
+            color: #ffffff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        select.select-status:focus {
+            border-color: #38bdf8;
+            outline: none;
+        }
+        .btn-save {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 12px;
+            transition: background 0.15s;
+        }
+        .btn-save:hover {
+            background: #0369a1;
+        }
+
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .empty-state i {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">
+            <i class="fa-solid fa-truck-medical"></i>
+            <div>
+                <h1>Emergency Department Triage Queue</h1>
+                <span class="badge-standard">MoHFW / DGHS National Clinical Protocol</span>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <a href="/" class="btn-nav btn-back"><i class="fa-solid fa-arrow-left"></i> Command Center</a>
+            <a href="/triage" class="btn-nav btn-triage"><i class="fa-solid fa-bolt"></i> Assess New Patient</a>
+        </div>
+    </div>
+
+    <!-- DGHS Priority Protocol Guidance Bar -->
+    <div class="protocol-bar">
+        <div class="proto-pill">
+            <div class="proto-dot dot-red"></div>
+            <div>
+                <strong style="color:#ef4444;">RED ZONE (Priority 1)</strong><br>
+                <span style="color:var(--text-secondary);">Immediate / 0 min (Life Threat)</span>
+            </div>
+        </div>
+        <div class="proto-pill">
+            <div class="proto-dot dot-yellow"></div>
+            <div>
+                <strong style="color:#f97316;">YELLOW ZONE (Priority 2)</strong><br>
+                <span style="color:var(--text-secondary);">Urgent Care / 10–30 mins</span>
+            </div>
+        </div>
+        <div class="proto-pill">
+            <div class="proto-dot dot-green"></div>
+            <div>
+                <strong style="color:#10b981;">GREEN ZONE (Priority 3)</strong><br>
+                <span style="color:var(--text-secondary);">Delayed / Routine Care</span>
+            </div>
+        </div>
+        <div class="proto-pill">
+            <div class="proto-dot dot-black"></div>
+            <div>
+                <strong style="color:#94a3b8;">BLACK ZONE (Priority 0)</strong><br>
+                <span style="color:var(--text-secondary);">NDMA Mass-Casualty / Expectant</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Queue Table -->
+    <div class="table-card">
+        {% if queue %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Patient ID</th>
+                    <th>Patient Details</th>
+                    <th>Primary Emergency</th>
+                    <th>DGHS Triage Zone</th>
+                    <th>Vitals (SpO₂ | HR | BP)</th>
+                    <th>Waiting Elapsed</th>
+                    <th>Status</th>
+                    <th>Update Care Stage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for q in queue %}
+                <tr>
+                    <td><span class="rank-badge">#{{ loop.index }}</span></td>
+                    <td><span class="id-badge">{{ q['patient_id'] }}</span></td>
+                    <td>
+                        <span class="patient-name">{{ q['name'] }}</span>
+                        <span class="patient-demo">{{ q['age'] }} yrs • {{ q['gender'] }}</span>
+                    </td>
+                    <td>
+                        <span class="incident-badge" title="{{ q['symptoms'] }}">
+                            {{ q['symptoms'] }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="triage-badge badge-{{ q['priority'] }}">
+                            {% if q['priority'] == 'RED' %}
+                                <i class="fa-solid fa-circle-radiation"></i> RED (P1)
+                            {% elif q['priority'] == 'YELLOW' %}
+                                <i class="fa-solid fa-triangle-exclamation"></i> YELLOW (P2)
+                            {% elif q['priority'] == 'GREEN' %}
+                                <i class="fa-solid fa-circle-check"></i> GREEN (P3)
+                            {% else %}
+                                <i class="fa-solid fa-circle-xmark"></i> BLACK (MCI)
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="vitals-summary">
+                            <span>SpO₂: <strong>{{ q['oxygen_level'] }}%</strong></span> | 
+                            <span>HR: <strong>{{ q['heart_rate'] }}</strong></span><br>
+                            <span>BP: <strong>{{ q['blood_pressure'] }}</strong></span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="timer-box">
+                            <i class="fa-solid fa-stopwatch"></i>
+                            <span class="timer" data-time="{{ q['created_at'] }}">00:00</span>
+                        </div>
+                    </td>
+                    <td>
+                        <strong style="color: #38bdf8;">{{ q['status'] }}</strong>
+                    </td>
+                    <td>
+                        <form method="POST" action="/update_status/{{ q['id'] }}" class="status-form">
+                            <select name="status" class="select-status">
+                                <option value="Waiting" {% if q['status'] == 'Waiting' %}selected{% endif %}>Waiting</option>
+                                <option value="Triage Review" {% if q['status'] == 'Triage Review' %}selected{% endif %}>Triage Review</option>
+                                <option value="With Doctor" {% if q['status'] == 'With Doctor' %}selected{% endif %}>With Doctor</option>
+                                <option value="In Resuscitation" {% if q['status'] == 'In Resuscitation' %}selected{% endif %}>In Resuscitation</option>
+                                <option value="Admitted / ICU" {% if q['status'] == 'Admitted / ICU' %}selected{% endif %}>Admitted / ICU</option>
+                                <option value="Discharged" {% if q['status'] == 'Discharged' %}selected{% endif %}>Discharged</option>
+                            </select>
+                            <button type="submit" class="btn-save">Update</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-bed"></i>
+            <h3>No Emergency Patients in Queue</h3>
+            <p>All emergency patients have been treated or discharged.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Real-Time Elapsed Waiting Stopwatch Script -->
+<script>
+    function updateElapsedTimers() {
+        const timerElements = document.querySelectorAll('.timer');
+        const now = new Date();
+
+        timerElements.forEach(el => {
+            const rawTimeStr = el.getAttribute('data-time');
+            if (!rawTimeStr) return;
+
+            // Normalize SQL standard datetime string to ISO format
+            const parsedTime = new Date(rawTimeStr.replace(' ', 'T'));
+            const diffMs = Math.max(0, now - parsedTime);
+
+            const hours = Math.floor(diffMs / 3600000);
+            const minutes = Math.floor((diffMs % 3600000) / 60000);
+            const seconds = Math.floor((diffMs % 60000) / 1000);
+
+            if (hours > 0) {
+                el.innerText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            } else {
+                el.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        });
+    }
+
+    // Refresh elapsed time every 1 second
+    setInterval(updateElapsedTimers, 1000);
+    updateElapsedTimers();
+</script>
+
+</body>
+</html>

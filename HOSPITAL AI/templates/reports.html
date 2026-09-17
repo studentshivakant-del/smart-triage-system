@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Emergency Reports</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f8fafc; }
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); max-width: 600px; margin: auto; }
+        h1 { color: #1e3a8a; }
+        .stat { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-size: 16px; }
+        .stat:last-child { border-bottom: none; }
+        a { text-decoration: none; color: #2563eb; display: inline-block; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📊 Hospital Emergency Analytics</h1>
+        <div class="stat"><span>Total Registered Patients:</span> <strong>{{ total_patients }}</strong></div>
+        <div class="stat"><span>Total Triage Assessments:</span> <strong>{{ total_assessments }}</strong></div>
+        <div class="stat"><span style="color:#dc2626;">Critical Cases:</span> <strong style="color:#dc2626;">{{ critical }}</strong></div>
+        <div class="stat"><span style="color:#d97706;">High Priority Cases:</span> <strong style="color:#d97706;">{{ high }}</strong></div>
+        <div class="stat"><span style="color:#16a34a;">Normal Priority Cases:</span> <strong style="color:#16a34a;">{{ normal }}</strong></div>
+        <a href="/">← Back to Dashboard</a>
+    </div>
+</body>
+</html>

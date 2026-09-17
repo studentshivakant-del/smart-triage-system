@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DGHS Clinical Emergency Triage - MoHFW India</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #0b1329;
+            --card-bg: #131f37;
+            --card-border: #1e2e4a;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 24px;
+        }
+        .container { max-width: 980px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 18px 26px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+        }
+        .header h1 { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 10px; color: #fff; }
+        .header a { color: #38bdf8; text-decoration: none; font-weight: 600; font-size: 14px; }
+        .guideline-badge {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 22px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+        }
+        .card h3 {
+            font-size: 14px;
+            color: #38bdf8;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; }
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px 14px;
+            background: #0b1329;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 14px;
+        }
+        select:focus, input:focus { border-color: #38bdf8; outline: none; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .grid-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .check-item {
+            background: #0b1329;
+            border: 1px solid var(--card-border);
+            padding: 12px 14px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        .check-item input { width: 18px; height: 18px; accent-color: #ef4444; }
+        .btn-submit {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 800;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-submit:hover { opacity: 0.95; }
+
+        /* DGHS Color Coding Box */
+        .ai-result {
+            padding: 22px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+            border-left: 8px solid;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.3);
+        }
+        .zone-RED { background: rgba(239, 68, 68, 0.15); border-color: #ef4444; }
+        .zone-YELLOW { background: rgba(249, 115, 22, 0.15); border-color: #f97316; }
+        .zone-GREEN { background: rgba(16, 185, 129, 0.15); border-color: #10b981; }
+        .zone-BLACK { background: rgba(15, 23, 42, 0.8); border-color: #64748b; }
+        
+        .result-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .result-tag { font-size: 26px; font-weight: 900; }
+        .conf-badge { background: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; }
+        .target-time { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+        .xai-box { background: rgba(11, 19, 41, 0.7); border: 1px solid var(--card-border); padding: 16px; border-radius: 8px; margin-top: 14px; }
+        .xai-box ul { margin: 8px 0 0 20px; font-size: 14px; color: #cbd5e1; }
+        .xai-box li { margin-bottom: 6px; }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-checks { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>
+            <i class="fa-solid fa-hospital" style="color:#ef4444;"></i>
+            AI Clinical Emergency Triage
+            <span class="guideline-badge">MoHFW / DGHS Guidelines</span>
+        </h1>
+        <a href="/"><i class="fa-solid fa-arrow-left"></i> Command Center</a>
+    </div>
+
+    {% if result %}
+    <div class="ai-result zone-{{ result.priority }}">
+        <div class="result-head">
+            <span class="result-tag" style="color: {% if result.priority == 'RED' %}#ef4444{% elif result.priority == 'YELLOW' %}#f97316{% elif result.priority == 'GREEN' %}#10b981{% else %}#cbd5e1{% endif %};">
+                {% if result.priority == 'RED' %}🔴 RED ZONE: IMMEDIATE RESUSCITATION (Priority 1)
+                {% elif result.priority == 'YELLOW' %}🟠 YELLOW ZONE: URGENT CARE (Priority 2)
+                {% elif result.priority == 'GREEN' %}🟢 GREEN ZONE: NON-URGENT (Priority 3)
+                {% else %}⚫ BLACK ZONE: EXPECTANT / DECEASED (MCI Protocol){% endif %}
+            </span>
+            <span class="conf-badge"><i class="fa-solid fa-microchip"></i> Confidence: {{ result.confidence }}%</span>
+        </div>
+        <div class="target-time" style="color: var(--text-secondary);">
+            Emergency Category: <strong>{{ result.category }}</strong> | Presentation: <strong>{{ result.incident }}</strong>
+        </div>
+        <div class="xai-box">
+            <strong style="color: #38bdf8;"><i class="fa-solid fa-notes-medical"></i> Explainable AI (Contributing Clinical Indicators):</strong>
+            <ul>
+                {% for r in result.reasons %}
+                <li>{{ r }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div style="margin-top: 16px;">
+            <a href="/queue" style="color: #38bdf8; text-decoration: none; font-weight: 700;"><i class="fa-solid fa-users-line"></i> View in Smart Emergency Queue →</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/triage">
+        <!-- Patient Selection -->
+        <div class="card">
+            <h3><i class="fa-solid fa-id-card-clip"></i> 1. Patient Selection</h3>
+            <label>Registered Emergency Patient:</label>
+            <select name="patient_id" required>
+                <option value="">-- Choose Admitted Patient --</option>
+                {% for p in patients %}
+                <option value="{{ p['patient_id'] }}">{{ p['patient_id'] }} - {{ p['name'] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- MoHFW Emergency Categories & Primary Incident -->
+        <div class="card">
+            <h3><i class="fa-solid fa-layer-group"></i> 2. Emergency Domain & Presentation (MoHFW Classification)</h3>
+            <div class="grid-2">
+                <div>
+                    <label>Broad Emergency Category:</label>
+                    <select name="emergency_category" id="categorySelect" onchange="updateIncidents()">
+                        <option value="Medical Emergencies">1. Medical Emergencies</option>
+                        <option value="Trauma & Accidents">2. Trauma & Accident Emergencies</option>
+                        <option value="Surgical Emergencies">3. Surgical Emergencies</option>
+                        <option value="Maternity & Child">4. Pregnancy & Child Emergencies</option>
+                        <option value="Disaster & MCI">5. Disaster / Mass-Casualty (NDMA)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Primary Emergency Incident:</label>
+                    <select name="primary_incident" id="incidentSelect">
+                        <!-- Populated by JavaScript -->
+                    </select>
+                    <input type="hidden" name="emergency_type_code" id="typeCode">
+                </div>
+            </div>
+        </div>
+
+        <!-- Clinical Distress Flags -->
+        <div class="card">
+            <h3><i class="fa-solid fa-triangle-exclamation"></i> 3. Clinical Red Flags & Symptoms</h3>
+            <div class="grid-checks">
+                <label class="check-item"><input type="checkbox" name="unconscious" value="1"> ⚠️ Unconscious / Altered Sensorium</label>
+                <label class="check-item"><input type="checkbox" name="heavy_bleeding" value="1"> 🩸 Active Massive Bleeding / Hemorrhage</label>
+                <label class="check-item"><input type="checkbox" name="respiratory_distress" value="1"> 🫁 Severe Respiratory Distress / Gasping</label>
+                <label class="check-item"><input type="checkbox" name="severe_pain" value="1"> ⚡ Excruciating Severe Pain (VAS 8-10)</label>
+            </div>
+        </div>
+
+        <!-- Vital Signs -->
+        <div class="card">
+            <h3><i class="fa-solid fa-heart-pulse"></i> 4. Physiological Vital Signs</h3>
+            <div class="grid-2">
+                <div>
+                    <label>Oxygen Saturation (SpO₂ %):</label>
+                    <input type="number" name="oxygen_level" step="0.1" placeholder="e.g. 96" required>
+                </div>
+                <div>
+                    <label>Heart Rate (BPM):</label>
+                    <input type="number" name="heart_rate" step="1" placeholder="e.g. 80" required>
+                </div>
+                <div>
+                    <label>Body Temperature (°C):</label>
+                    <input type="number" name="temperature" step="0.1" placeholder="e.g. 37.0" required>
+                </div>
+                <div>
+                    <label>Respiration Rate (Breaths/min):</label>
+                    <input type="number" name="respiratory_rate" step="1" placeholder="e.g. 18" required>
+                </div>
+            </div>
+            
+            <label>Blood Pressure (Systolic/Diastolic mmHg):</label>
+            <input type="text" name="blood_pressure" placeholder="e.g. 120/80 (Systolic < 90 triggers Shock Warning)">
+
+            <button type="submit" class="btn-submit"><i class="fa-solid fa-bolt"></i> Run AI Triage Assessment</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const incidentData = {
+        "Medical Emergencies": [
+            { text: "❤️ Heart Attack / Acute Chest Pain", code: "chest_pain" },
+            { text: "🫁 Severe Breathing Difficulty / Asthma / COPD", code: "respiratory" },
+            { text: "🧠 Stroke (Paralysis / Speech Impairment)", code: "stroke" },
+            { text: "🐍 Snake Bite / Animal Envenomation", code: "snake_bite" },
+            { text: "☠️ Poisoning / Chemical Ingestion", code: "poisoning" },
+            { text: "💧 Severe Vomiting / Diarrhea / Dehydration", code: "dehydration" },
+            { text: "🤒 High Fever with Severe Chills (Dengue/Malaria)", code: "dehydration" }
+        ],
+        "Trauma & Accidents": [
+            { text: "🚗 Road Traffic Accident (RTA - Severe)", code: "rta" },
+            { text: "🏍️ Motorcycle Crash / Head Injury", code: "rta" },
+            { text: "🔥 Severe Thermal / Chemical Burns", code: "burns" },
+            { text: "⚡ Electrocution / High Voltage Shock", code: "burns" },
+            { text: "🌊 Drowning / Near-Drowning", code: "respiratory" },
+            { text: "🧱 Major Fall / Suspected Spine Injury", code: "rta" }
+        ],
+        "Surgical Emergencies": [
+            { text: "Severe Abdominal Pain (Acute Abdomen)", code: "chest_pain" },
+            { text: "Suspected Appendicitis / Perforation", code: "chest_pain" },
+            { text: "Acute Intestinal Obstruction", code: "dehydration" }
+        ],
+        "Maternity & Child": [
+            { text: "Severe Pregnancy Complication / Eclampsia", code: "pregnancy" },
+            { text: "Obstructed Labour / Fetal Distress", code: "pregnancy" },
+            { text: "Newborn / Pediatric Respiratory Failure", code: "respiratory" }
+        ],
+        "Disaster & MCI": [
+            { text: "🚆 Train / Multi-Vehicle Collision (MCI)", code: "disaster" },
+            { text: "🔥 Industrial Fire / Building Collapse", code: "disaster" },
+            { text: "🌡️ Severe Heat Wave / Heat Stroke Crisis", code: "disaster" },
+            { text: "🌊 Flood / Cyclone / Mass Trauma", code: "disaster" }
+        ]
+    };
+
+    function updateIncidents() {
+        const cat = document.getElementById('categorySelect').value;
+        const incSelect = document.getElementById('incidentSelect');
+        const codeInput = document.getElementById('typeCode');
+        incSelect.innerHTML = "";
+        
+        incidentData[cat].forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.text;
+            opt.innerText = item.text;
+            opt.setAttribute('data-code', item.code);
+            incSelect.appendChild(opt);
+        });
+
+        codeInput.value = incidentData[cat][0].code;
+    }
+
+    document.getElementById('incidentSelect').addEventListener('change', function() {
+        const selected = this.options[this.selectedIndex];
+        document.getElementById('typeCode').value = selected.getAttribute('data-code');
+    });
+
+    // Initialize on load
+    updateIncidents();
+</script>
+</body>
+</html>
